@@ -23,5 +23,17 @@ namespace ApiPersonalAudioAssistant.Controllers.v1
             var mainUser = await Mediator.Send(command);
             return Ok(mainUser);
         }
+
+        [HttpPost("update-mainuser")]
+        public async Task<IActionResult> UpdateMainUser(UpdateMainUserCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateMainUser(CreateMainUserCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
     }
 }

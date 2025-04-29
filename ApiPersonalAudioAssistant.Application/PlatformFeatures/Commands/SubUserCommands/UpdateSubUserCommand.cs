@@ -1,23 +1,24 @@
 ﻿using MediatR;
 using ApiPersonalAudioAssistant.Application.Interfaces;
 using ApiPersonalAudioAssistant.Application.Services;
+using System.Collections;
 
 namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUserCommands
 {
     public class UpdateSubUserCommand : IRequest<Unit>
     {
-        public string Id { get; set; }
-        public string UserId { get; set; }
-        public string UserName { get; set; }
-        public string StartPhrase { get; set; }
+        public string? Id { get; set; }
+        public string? UserId { get; set; }
+        public string? UserName { get; set; }
+        public string? StartPhrase { get; set; }
         public string? EndPhrase { get; set; }
         public string? EndTime { get; set; }
-        public string VoiceId { get; set; }
+        public string? VoiceId { get; set; }
         //public List<double> UserVoice { get; set; }
-        public Stream UserVoice { get; set; }
+        public byte[]? UserVoice { get; set; };
         public string? Password { get; set; }
         public string? NewPassword { get; set; }
-        public string PhotoPath { get; set; }
+        public string? PhotoPath { get; set; }
     }
 
     public class UpdateSubUserCoomandHandler : IRequestHandler<UpdateSubUserCommand, Unit>
@@ -37,20 +38,20 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
 
         public async Task<Unit> Handle(UpdateSubUserCommand request, CancellationToken cancellationToken = default)
         {
-            if(request.StartPhrase != null)
+            var userExist = await _subUserRepository.GetUserByIdAsync(request.Id, cancellationToken);
+
+            if (userExist == null)
+            {
+                throw new Exception("Користувача не знайдено");
+            }
+
+            if (request.StartPhrase != null && userExist.StartPhrase!= request.StartPhrase)
             {
                 var userByStartPhrase = await _subUserRepository.GetUserByStartPhraseAsync(request.UserId, request.StartPhrase, cancellationToken);
                 if (userByStartPhrase != null)
                 {
                     throw new Exception("Користувач із цією стартовою вразою вже існує");
                 }
-            }
-
-            var userExist = await _subUserRepository.GetUserByIdAsync(request.Id, cancellationToken);
-
-            if (userExist == null)
-            {
-                throw new Exception("Користувача не знайдено");
             }
 
             userExist.UserName = request.UserName ?? userExist.UserName;
@@ -61,7 +62,10 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
 
             if(request.UserVoice != null)
             {
-                userExist.UserVoice = await _apiClientVoiceEmbedding.CreateVoiceEmbedding(request.UserVoice);
+                var stream = new MemoryStream(request.UserVoice); 
+                await _apiClientVoiceEmbedding.CreateVoiceEmbedding(stream);
+
+                userExist.UserVoice = await _apiClientVoiceEmbedding.CreateVoiceEmbedding(stream);
             }
 
             if (request.Password != null && request.NewPassword != null)

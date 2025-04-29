@@ -24,7 +24,7 @@ namespace ApiPersonalAudioAssistant.Controllers.v1
         }
 
         [HttpDelete]
-        public async Task<IActionResult> GetConversationById(DeleteConversationCommand command)
+        public async Task<IActionResult> DeleteConversationById(DeleteConversationCommand command)
         {
             return Ok(await Mediator.Send(command));
         }

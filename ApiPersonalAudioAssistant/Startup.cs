@@ -40,8 +40,10 @@ namespace ApiPersonalAudioAssistant
 
               services.AddScoped<PasswordManager>();
 
-              services.AddScoped<TokenBase>();
-            services.AddHttpClient<ApiClientVoiceEmbedding>();
+            services.AddScoped<TokenBase>();
+            services.AddScoped<PasswordManager>();
+            services.AddScoped<IApiClient, ApiClientVoiceEmbedding>();
+            services.AddScoped<ApiClientVoiceEmbedding>();
             services.AddScoped<IMainUserRepository, MainUserRepository>();
             services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
             services.AddScoped<ISubUserRepository, SubUserRepository>();

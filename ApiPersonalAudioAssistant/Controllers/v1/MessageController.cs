@@ -1,6 +1,4 @@
-﻿using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.ConversationCommands;
-using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.MessageCommands;
-using ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.ConversationQuery;
+﻿using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.MessageCommands;
 using ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.MessageQuery;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

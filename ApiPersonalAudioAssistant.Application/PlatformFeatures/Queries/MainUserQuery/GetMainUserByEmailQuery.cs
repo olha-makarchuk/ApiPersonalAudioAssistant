@@ -6,7 +6,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.MainUse
 {
     public class GetMainUserByEmailQuery : IRequest<MainUserResponse>
     {
-        public required string Name { get; set; }
+        public required string Email { get; set; }
 
         public class GetMainUserByEmailQueryHandler : IRequestHandler<GetMainUserByEmailQuery, MainUserResponse>
         {
@@ -17,7 +17,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.MainUse
             }
             public async Task<MainUserResponse> Handle(GetMainUserByEmailQuery query, CancellationToken cancellationToken)
             {
-                var user = await _mainUserRepository.GetUserByEmailAsync(query.Name, cancellationToken);
+                var user = await _mainUserRepository.GetUserByEmailAsync(query.Email, cancellationToken);
                 if(user == null)
                 {
                     throw new Exception("User not found");

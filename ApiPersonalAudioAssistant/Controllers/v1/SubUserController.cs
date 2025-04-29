@@ -1,7 +1,6 @@
-﻿using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.MessageCommands;
-using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUserCommands;
-using ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.MessageQuery;
+﻿using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUserCommands;
 using ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.SubUserQuery;
+using ApiPersonalAudioAssistant.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,7 +38,18 @@ namespace ApiPersonalAudioAssistant.Controllers.v1
         [HttpPut]
         public async Task<IActionResult> UpdateSubUser(UpdateSubUserCommand command)
         {
-            return Ok(await Mediator.Send(command));
+            try
+            {
+                await Mediator.Send(command);
+                return Ok();
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
         }
 
         [HttpPost("check-password")]
