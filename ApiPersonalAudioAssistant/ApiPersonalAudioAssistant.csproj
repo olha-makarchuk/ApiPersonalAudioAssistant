@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CorrelationId" Version="3.0.1" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.49.0" />
@@ -14,6 +15,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="8.0.15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApiPersonalAudioAssistant.Application\ApiPersonalAudioAssistant.Application.csproj" />
+    <ProjectReference Include="..\ApiPersonalAudioAssistant.Persistence\ApiPersonalAudioAssistant.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

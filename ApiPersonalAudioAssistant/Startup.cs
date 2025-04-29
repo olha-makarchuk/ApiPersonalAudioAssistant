@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Fluent;
-using System;
-using System.Reflection;
+﻿using ApiPersonalAudioAssistant.Application.Interfaces;
+using ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands;
+using ApiPersonalAudioAssistant.Application.Services;
+using ApiPersonalAudioAssistant.Persistence.Context;
+using ApiPersonalAudioAssistant.Persistence.Repositories;
+using CorrelationId.DependencyInjection;
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using PeronalAudioAssistant.Application.PlatformFeatures;
 
 namespace ApiPersonalAudioAssistant
 {
@@ -21,17 +25,35 @@ namespace ApiPersonalAudioAssistant
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddHttpLogging(o => o = new HttpLoggingOptions());
             services.AddEndpointsApiExplorer();
+            services.AddLogging();
+            services.AddDefaultCorrelationId();
             services.AddSwaggerGen();
+            services.AddApiVersioning();
+            services.AddApplication();
             services.AddApiVersioning(t =>
             {
                 t.ApiVersionReader = new UrlSegmentApiVersionReader();
                 t.ReportApiVersions = true;
             });
-            services.AddApiVersioning();
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
+              services.AddScoped<PasswordManager>();
+
+              services.AddScoped<TokenBase>();
+            services.AddHttpClient<ApiClientVoiceEmbedding>();
+            services.AddScoped<IMainUserRepository, MainUserRepository>();
+            services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
             services.AddScoped<ISubUserRepository, SubUserRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IAutoPaymentRepository, AutoPaymentRepository>();
+            services.AddScoped<IPaymentHistoryRepository, PaymentHistoryRepository>();
             services.AddScoped<IVoiceRepository, VoiceRepository>();
+            services.AddScoped<IConversationRepository, ConversationRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
+
+            services.AddScoped<IBlobStorage, BlobStorage>();
+            services.AddSingleton<BlobStorageConfig>();
 
             ConfigureDb(services);
         }
