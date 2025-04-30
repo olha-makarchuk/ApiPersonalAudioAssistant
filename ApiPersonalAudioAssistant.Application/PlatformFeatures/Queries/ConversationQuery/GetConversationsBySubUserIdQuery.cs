@@ -28,51 +28,69 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.Convers
             public async Task<List<AllConversationsResponse>> Handle(GetConversationsBySubUserIdQuery query, CancellationToken cancellationToken)
             {
                 var apiGPT = new ApiClientGPT();
-
-                var conversations = await _conversationRepository.GetConversationsByUserIdPaginatorAsync(
-                    query.SubUserId,
-                    query.PageNumber,
-                    query.PageSize,
-                    cancellationToken
-                );
-
-                if (conversations == null)
-                {
-                    throw new Exception("Conversation not found");
-                }
-
                 var responseList = new List<AllConversationsResponse>();
 
-                foreach (var conv in conversations)
+                int currentPage = query.PageNumber;
+                int conversationsFetched = 0;
+
+                while (responseList.Count < query.PageSize)
                 {
-                    if (string.IsNullOrWhiteSpace(conv.Description))
+                    var conversations = await _conversationRepository.GetConversationsByUserIdPaginatorAsync(
+                        query.SubUserId,
+                        currentPage,
+                        query.PageSize,
+                        cancellationToken
+                    );
+
+                    if (conversations == null || !conversations.Any())
+                        break; // немає більше розмов у базі
+
+                    foreach (var conv in conversations)
                     {
                         var message = await _messageRepository.GetLastMessageByConversationIdAsync(conv.Id.ToString(), cancellationToken);
 
-                        ApiClientGptResponse descriptionGpt = await apiGPT.ContinueChatAsync(
-                            "На основі розмови напиши короткий заголовок, який підсумовує основну тему",
-                            message.LastRequestId
-                        );
-
-                        var updateCommand = new UpdateConversationCommand
+                        if (message == null)
                         {
-                            ConversationId = conv.Id.ToString(),
-                            Description = descriptionGpt.text
-                        };
+                            // Видаляємо розмову без повідомлень
+                            await _conversationRepository.DeleteConversationAsync(conv, cancellationToken);
+                            continue;
+                        }
 
-                        await _mediator.Send(updateCommand, cancellationToken);
+                        // Якщо опис порожній — генеруємо за допомогою GPT
+                        if (string.IsNullOrWhiteSpace(conv.Description))
+                        {
+                            ApiClientGptResponse descriptionGpt = await apiGPT.ContinueChatAsync(
+                                "На основі розмови напиши короткий заголовок, який підсумовує основну тему",
+                                message.LastRequestId
+                            );
+
+                            var updateCommand = new UpdateConversationCommand
+                            {
+                                ConversationId = conv.Id.ToString(),
+                                Description = descriptionGpt.text
+                            };
+
+                            await _mediator.Send(updateCommand, cancellationToken);
+                            conv.Description = descriptionGpt.text;
+                        }
+
+                        responseList.Add(new AllConversationsResponse
+                        {
+                            IdConversation = conv.Id.ToString(),
+                            Description = conv.Description,
+                            DateTimeCreated = conv.DateTimeCreated
+                        });
+
+                        if (responseList.Count == query.PageSize)
+                            break; // вже набрали потрібну кількість
                     }
 
-                    responseList.Add(new AllConversationsResponse
-                    {
-                        IdConversation = conv.Id.ToString(),
-                        Description = conv.Description,
-                        DateTimeCreated = conv.DateTimeCreated
-                    });
+                    currentPage++; // переходимо до наступної сторінки
                 }
+
                 return responseList
-                        .OrderByDescending(x => x.DateTimeCreated)
-                        .ToList();
+                    .OrderByDescending(x => x.DateTimeCreated)
+                    .ToList();
             }
         }
     }
