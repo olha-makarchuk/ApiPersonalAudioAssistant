@@ -17,6 +17,10 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.VoiceQu
             }
             public async Task<VoiceResponse> Handle(GetVoiceByIdQuery query, CancellationToken cancellationToken)
             {
+                if(string.IsNullOrEmpty(query.VoiceId))
+                {
+                    throw new Exception("Voice not found");
+                }
                 var voice = await _voiceRepository.GetVoiceByIdAsync(query.VoiceId, cancellationToken);
                 if (voice == null)
                 {

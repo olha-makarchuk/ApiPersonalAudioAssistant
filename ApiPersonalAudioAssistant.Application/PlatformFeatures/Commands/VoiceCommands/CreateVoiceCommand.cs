@@ -4,14 +4,14 @@ using ApiPersonalAudioAssistant.Domain.Entities;
 
 namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.VoiceCommands
 {
-   public class CreateVoiceCommand : IRequest<string>
+   public class CreateVoiceCommand : IRequest<CreatedVoice>
     {
         public string VoiceId { get; set; }
         public string Name { get; set; }
         public string? UserId { get; set; }
    }
 
-    public class CreateVoiceCommandHandler : IRequestHandler<CreateVoiceCommand, string>
+    public class CreateVoiceCommandHandler : IRequestHandler<CreateVoiceCommand, CreatedVoice>
     {
         private readonly IVoiceRepository _voiceRepository;
 
@@ -20,7 +20,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.VoiceC
             _voiceRepository = voiceRepository;
         }
 
-        public async Task<string> Handle(CreateVoiceCommand request, CancellationToken cancellationToken = default)
+        public async Task<CreatedVoice> Handle(CreateVoiceCommand request, CancellationToken cancellationToken = default)
         {
             /*
             var user = await _voiceRepository.GetVoiceByIdAsync(request.UserId, cancellationToken);
@@ -36,7 +36,13 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.VoiceC
                 UserId = request.UserId
             };
             await _voiceRepository.CreateVoice(newVoice, cancellationToken);
-            return newVoice.Id.ToString();
+
+            CreatedVoice createdVoice = new()
+            {
+                VoiceId = newVoice.Id.ToString()
+            };
+
+            return createdVoice;
 
 
             /*
@@ -301,5 +307,10 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.VoiceC
             await _voiceRepository.CreateVoice(newVoice, cancellationToken);
             */
         }
+    }
+
+    public class CreatedVoice
+    {
+        public string VoiceId { get; set; }
     }
 }

@@ -1,14 +1,14 @@
 ﻿using MediatR;
 using ApiPersonalAudioAssistant.Application.Interfaces;
 using ApiPersonalAudioAssistant.Application.Services;
-using System;
+using Microsoft.AspNetCore.Http;
 
 namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUserCommands
 {
     public class UpdatePhotoCommand : IRequest<Unit>
     {
         public string PhotoURL { get; set; }
-        public string PhotoPath { get; set; }
+        public IFormFile Photo { get; set; }
     }
 
     public class UpdatePhotoCommandHandler : IRequestHandler<UpdatePhotoCommand, Unit>
@@ -24,14 +24,16 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
 
         public async Task<Unit> Handle(UpdatePhotoCommand request, CancellationToken cancellationToken = default)
         {
-            if (request.PhotoPath != null && request.PhotoURL != null)
+            if (request.Photo != null && request.PhotoURL != null)
             {
-                using var stream = System.IO.File.OpenRead(request.PhotoPath);
+                using var stream = request.Photo.OpenReadStream();
                 string fileName = $"{Path.GetFileName(request.PhotoURL)}";
-                var a = await _blobStorage.FileExistsAsync(fileName, BlobContainerType.UserImage);
 
-                await _blobStorage.DeleteAsync(fileName, BlobContainerType.UserImage);
-                //a = await _blobStorage.FileExistsAsync(fileName, BlobContainerType.UserImage);
+                var exists = await _blobStorage.FileExistsAsync(fileName, BlobContainerType.UserImage);
+                if (exists)
+                {
+                    await _blobStorage.DeleteAsync(fileName, BlobContainerType.UserImage);
+                }
 
                 await _blobStorage.PutContextAsync(fileName, stream, BlobContainerType.UserImage);
             }

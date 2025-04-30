@@ -27,7 +27,7 @@ namespace ApiPersonalAudioAssistant.Controllers.v1
         {
             var autoPayment = await Mediator.Send(command);
 
-            return Ok(await Mediator.Send(autoPayment));
+            return Ok(autoPayment);
         }
     }
 }

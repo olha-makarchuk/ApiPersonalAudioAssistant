@@ -15,7 +15,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
         public string? EndTime { get; set; }
         public string? VoiceId { get; set; }
         //public List<double> UserVoice { get; set; }
-        public byte[]? UserVoice { get; set; };
+        public byte[]? UserVoice { get; set; } = Array.Empty<byte>();
         public string? Password { get; set; }
         public string? NewPassword { get; set; }
         public string? PhotoPath { get; set; }
@@ -60,7 +60,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
             userExist.EndTime = request.EndTime ?? userExist.EndTime;
             userExist.VoiceId = request.VoiceId ?? userExist.VoiceId;
 
-            if(request.UserVoice != null)
+            if(request.UserVoice != Array.Empty<byte>())
             {
                 var stream = new MemoryStream(request.UserVoice); 
                 await _apiClientVoiceEmbedding.CreateVoiceEmbedding(stream);
@@ -68,7 +68,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
                 userExist.UserVoice = await _apiClientVoiceEmbedding.CreateVoiceEmbedding(stream);
             }
 
-            if (request.Password != null && request.NewPassword != null)
+            if (!String.IsNullOrEmpty(request.Password) && !String.IsNullOrEmpty(request.NewPassword))
             {
                 if (!_passwordManager.VerifyPasswordHash(request.Password, userExist.PasswordHash!, userExist.PasswordSalt!))
                 {
@@ -80,7 +80,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
                 userExist.PasswordSalt = passwordSalt;
             }
 
-            if(userExist.PasswordHash == null && request.NewPassword != null)
+            if(userExist.PasswordHash == Array.Empty<byte>() && !String.IsNullOrEmpty(request.NewPassword))
             {
                 _passwordManager.CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
                 userExist.PasswordHash = passwordHash;

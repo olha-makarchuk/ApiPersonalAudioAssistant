@@ -1,9 +1,9 @@
-﻿using Google.Apis.Drive.v3.Data;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using ApiPersonalAudioAssistant.Application.Interfaces;
 using ApiPersonalAudioAssistant.Application.Services;
 using ApiPersonalAudioAssistant.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUserCommands
 {
@@ -17,7 +17,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
         public required List<double> UserVoice { get; set; }
         public string? Password { get; set; }
         public required string UserId { get; set; }
-        public required string PhotoPath { get; set; }
+        public IFormFile Photo { get; set; }
     }
 
     public class AddSubUserCommandHandler : IRequestHandler<AddSubUserCommand, string>
@@ -63,10 +63,11 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
             }
             await _subUserRepository.AddUser(newUser, cancellationToken);
 
-            var extension = Path.GetExtension(request.PhotoPath);
-            using var stream = System.IO.File.OpenRead(request.PhotoPath);
+            var extension = Path.GetExtension(request.Photo.FileName);
+            using var stream = request.Photo.OpenReadStream();
             string fileName = $"{newUser.Id}{extension}";
             await _blobStorage.PutContextAsync(fileName, stream, BlobContainerType.UserImage);
+
             newUser.PhotoPath = $"https://audioassistantblob.blob.core.windows.net/user-image/{fileName}";
             await _subUserRepository.UpdateUser(newUser, cancellationToken);
 

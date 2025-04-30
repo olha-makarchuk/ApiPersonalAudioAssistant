@@ -3,6 +3,7 @@ using ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.SubUserQuer
 using ApiPersonalAudioAssistant.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace ApiPersonalAudioAssistant.Controllers.v1
 {
@@ -11,10 +12,20 @@ namespace ApiPersonalAudioAssistant.Controllers.v1
     {
         public SubUserController(IMediator mediator) : base(mediator) { }
 
-        [HttpPost]
-        public async Task<IActionResult> AddSubUser(AddSubUserCommand command)
+        [HttpPost("create")]
+        public async Task<IActionResult> AddSubUser([FromForm] IFormFile file, [FromForm] string command)
         {
-            return Ok(await Mediator.Send(command));//string Id
+            var deserializedCommand = JsonSerializer.Deserialize<AddSubUserCommand>(command, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (deserializedCommand == null)
+                return BadRequest("Invalid command data.");
+
+            deserializedCommand.Photo = file;
+
+            return Ok(await Mediator.Send(deserializedCommand));
         }
 
         [HttpDelete("password")]
@@ -35,21 +46,46 @@ namespace ApiPersonalAudioAssistant.Controllers.v1
             return Ok(await Mediator.Send(command));
         }
 
-        [HttpPut]
+        [HttpPost("change-photo")]
+        public async Task<IActionResult> ChangePhoto([FromForm] UpdatePhotoCommand command)
+        {
+            await Mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpPost("update-user-voice")]
+        public async Task<IActionResult> UpdateUserVoice(UpdateUserVoiceCommand command)
+        {
+            await Mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpPost("update-voice")]
+        public async Task<IActionResult> UpdateVoice(UpdateVoiceActingCommand command)
+        {
+            await Mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpPost("update-personal-information")]
+        public async Task<IActionResult> UpdatePersonalInformation(UpdatePersonalInformationCommand command)
+        {
+            await Mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpPost("update-password")]
+        public async Task<IActionResult> UpdatePasswordInformation(UpdatePasswordCommand command)
+        {
+            await Mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpPost]
         public async Task<IActionResult> UpdateSubUser(UpdateSubUserCommand command)
         {
-            try
-            {
-                await Mediator.Send(command);
-                return Ok();
-
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-
+            await Mediator.Send(command);
+            return Ok();
         }
 
         [HttpPost("check-password")]

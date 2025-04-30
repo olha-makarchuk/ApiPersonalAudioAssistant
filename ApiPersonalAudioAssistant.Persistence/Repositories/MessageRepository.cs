@@ -32,11 +32,12 @@ namespace ApiPersonalAudioAssistant.Persistence.Repositories
 
         public async Task<Message> GetLastMessageByConversationIdAsync(string conversationId, CancellationToken cancellationToken)
         {
-            return await _context.Messages
-                .Where(m => m.ConversationId == conversationId)
-                .Where(m => m.UserRole == "user")
-                .OrderBy(m => m.DateTimeCreated)
-                .LastOrDefaultAsync(cancellationToken);
+            var a = await _context.Messages
+                .Where(m => m.ConversationId == conversationId && m.UserRole == "user")
+                .OrderByDescending(m => m.DateTimeCreated)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return a;
         }
 
         public async Task<List<Message>> GetMessagesByConversationIdAsync(string conversationId, CancellationToken cancellationToken)
