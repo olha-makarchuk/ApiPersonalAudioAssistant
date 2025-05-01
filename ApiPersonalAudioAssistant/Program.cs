@@ -21,6 +21,6 @@ public class Program
             {
                 webBuilder
                     .UseStartup<Startup>()
-                    .UseUrls("http://0.0.0.0:8080", "https://0.0.0.0:8070"); // слухати на всіх IP
+                    .UseUrls("http://0.0.0.0:8080", "https://0.0.0.0:8090"); // слухати на всіх IP
             });
 }

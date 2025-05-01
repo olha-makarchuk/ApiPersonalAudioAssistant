@@ -38,7 +38,9 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.Message
                     ConversationId = mes.ConversationId.ToString(),
                     Text = mes.Text,
                     UserRole = mes.UserRole,
-                    AudioPath = mes.AudioPath
+                    AudioPath = mes.AudioPath,
+                    LastRequestId = mes.LastRequestId,
+                    DateTimeCreated = mes.DateTimeCreated
                 }).ToList();
 
                 return responseList;

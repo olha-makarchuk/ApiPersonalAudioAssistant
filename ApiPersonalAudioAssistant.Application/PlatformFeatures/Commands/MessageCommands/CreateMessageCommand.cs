@@ -2,12 +2,12 @@
 using ApiPersonalAudioAssistant.Application.Interfaces;
 using ApiPersonalAudioAssistant.Application.Services;
 using ApiPersonalAudioAssistant.Domain.Entities;
-using System.IO;
 using System.Text;
+using ApiPersonalAudioAssistant.Contracts.Message;
 
 namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.MessageCommands
 {
-    public class CreateMessageCommand : IRequest<Unit>
+    public class CreateMessageCommand : IRequest<MessageResponse>
     {
         public string ConversationId { get; set; }
         public string Text { get; set; }
@@ -16,7 +16,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
         public string? LastRequestId { get; set; }
     }
 
-    public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, Unit>
+    public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, MessageResponse>
     {
         private readonly IMessageRepository _messageRepository;
         private readonly IBlobStorage _blobStorage;
@@ -27,7 +27,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
             _blobStorage = blobStorage;
         }
 
-        public async Task<Unit> Handle(CreateMessageCommand request, CancellationToken cancellationToken = default)
+        public async Task<MessageResponse> Handle(CreateMessageCommand request, CancellationToken cancellationToken = default)
         {
             byte[] bytesAudio;
 
@@ -62,7 +62,17 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
             message.AudioPath = $"https://audioassistantblob.blob.core.windows.net/audio-message/{fileName}";
             await _messageRepository.AddMessageAsync(message, cancellationToken);
 
-            return Unit.Value;
+            var messageResponse = new MessageResponse()
+            {
+                MessageId = message.Id.ToString(),
+                ConversationId = message.ConversationId,
+                AudioPath = message.AudioPath,
+                LastRequestId = message.LastRequestId,
+                Text = message.Text,
+                UserRole = message.UserRole
+            };
+
+            return messageResponse;
         }
 
         public static byte[] ConvertPcmToWav(byte[] pcmData, int sampleRate = 44100, short bitsPerSample = 16, short channels = 1)
