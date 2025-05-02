@@ -10,6 +10,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
     public class CreateMessageCommand : IRequest<MessageResponse>
     {
         public string ConversationId { get; set; }
+        public string SubUserId { get; set; }
         public string Text { get; set; }
         public string UserRole { get; set; }
         public byte[] Audio { get; set; }
@@ -45,6 +46,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
                 {
                     ConversationId = request.ConversationId,
                     Text = request.Text,
+                    SubUserId = request.SubUserId,
                     UserRole = request.UserRole,
                     DateTimeCreated = DateTime.UtcNow,
                     LastRequestId = request.LastRequestId,

@@ -18,6 +18,8 @@ namespace ApiPersonalAudioAssistant.Persistence.Context
         public DbSet<AutoPayments> AutoPayments { get; set; }
         public DbSet<PaymentHistory> PaymentHistory { get; set; }
         public DbSet<Voice> Voices { get; set; }
+        public DbSet<MoneyUsed> MoneyUsed { get; set; }
+        public DbSet<MoneyUsersUsed> MoneyUsersUsed { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +32,8 @@ namespace ApiPersonalAudioAssistant.Persistence.Context
             modelBuilder.Entity<AutoPayments>().ToContainer("AutoPayments");
             modelBuilder.Entity<PaymentHistory>().ToContainer("PaymentHistory");
             modelBuilder.Entity<Voice>().ToContainer("Voice");
+            modelBuilder.Entity<MoneyUsed>().ToContainer("MoneyUsed");
+            modelBuilder.Entity<MoneyUsersUsed>().ToContainer("MoneyUsersUsed");
         }
     }
 }
