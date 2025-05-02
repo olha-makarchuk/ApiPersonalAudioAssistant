@@ -1,6 +1,7 @@
 ﻿using ApiPersonalAudioAssistant.Application.Interfaces;
 using ApiPersonalAudioAssistant.Domain.Entities;
 using ApiPersonalAudioAssistant.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiPersonalAudioAssistant.Persistence.Repositories
 {
@@ -12,29 +13,37 @@ namespace ApiPersonalAudioAssistant.Persistence.Repositories
             _context = context;
         }
 
-        public Task AddMoneyUsedAsync(MoneyUsed moneyUsed, CancellationToken cancellationToken)
+        public async Task AddMoneyUsedAsync(MoneyUsed moneyUsed, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await _context.MoneyUsed.AddAsync(moneyUsed, cancellationToken);
+            _context.SaveChanges();
         }
 
-        public Task GetMoneyUsedbyMainIdAndAsync(string moneyUsedId, DateTime dateTime, CancellationToken cancellationToken)
+        public async Task<List<MoneyUsed>> GetMoneyUsedByMainUserIdAsync(string mainUserId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var twelveMonthsAgo = DateTime.UtcNow.AddMonths(-12).Date;
+
+            return await _context.MoneyUsed
+                .Where(mu => mu.MainUserId == mainUserId && mu.DateTimeUsed.Date >= twelveMonthsAgo)
+                .ToListAsync(cancellationToken);
         }
 
-        public Task<List<MoneyUsed>> GetMoneyUsedByMainUserIdAsync(string mainUserId, CancellationToken cancellationToken)
+
+        public async Task UpdateMoneyUsedAsync(MoneyUsed moneyUsed, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            _context.MoneyUsed.Update(moneyUsed);
+            _context.SaveChanges();
         }
 
-        public Task UpdateMoneyUsedAsync(MoneyUsed moneyUsed, CancellationToken cancellationToken)
+        public async Task<MoneyUsed> GetMoneyUsedbyMainIdAndDateAsync(string moneyUsedId, DateTime dateTime, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var dateOnly = dateTime.Date;
+            var nextDay = dateOnly.AddDays(1);
+
+            return await _context.MoneyUsed
+                .Where(mu => mu.MainUserId == moneyUsedId && mu.DateTimeUsed >= dateOnly && mu.DateTimeUsed < nextDay)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        Task<MoneyUsed> IMoneyUsedRepository.GetMoneyUsedbyMainIdAndDateAsync(string moneyUsedId, DateTime dateTime, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

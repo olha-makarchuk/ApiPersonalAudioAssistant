@@ -53,6 +53,8 @@ namespace ApiPersonalAudioAssistant
             services.AddScoped<IVoiceRepository, VoiceRepository>();
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IMoneyUsedRepository, MoneyUsedRepository>();
+            services.AddScoped<IMoneyUsersUsedRepository, MoneyUsersUsedRepository>();
 
             services.AddScoped<IBlobStorage, BlobStorage>();
             services.AddSingleton<BlobStorageConfig>();
