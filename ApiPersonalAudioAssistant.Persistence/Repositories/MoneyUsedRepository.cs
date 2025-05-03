@@ -21,11 +21,15 @@ namespace ApiPersonalAudioAssistant.Persistence.Repositories
 
         public async Task<List<MoneyUsed>> GetMoneyUsedByMainUserIdAsync(string mainUserId, CancellationToken cancellationToken)
         {
-            var twelveMonthsAgo = DateTime.UtcNow.AddMonths(-12).Date;
+            var twelveMonthsAgo = DateTime.UtcNow.Date.AddMonths(-12);
 
-            return await _context.MoneyUsed
-                .Where(mu => mu.MainUserId == mainUserId && mu.DateTimeUsed.Date >= twelveMonthsAgo)
+            var all = await _context.MoneyUsed
+                .Where(mu => mu.MainUserId == mainUserId)
                 .ToListAsync(cancellationToken);
+
+            return all
+                .Where(mu => mu.DateTimeUsed.Date >= twelveMonthsAgo)
+                .ToList();
         }
 
 
