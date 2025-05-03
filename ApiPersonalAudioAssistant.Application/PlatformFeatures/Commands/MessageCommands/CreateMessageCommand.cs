@@ -70,6 +70,8 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
                 ConversationId = message.ConversationId,
                 AudioPath = message.AudioPath,
                 LastRequestId = message.LastRequestId,
+                SubUserId = message.SubUserId,
+                DateTimeCreated = message.DateTimeCreated,
                 Text = message.Text,
                 UserRole = message.UserRole
             };
