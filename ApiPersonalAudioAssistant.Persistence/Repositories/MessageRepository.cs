@@ -48,14 +48,25 @@ namespace ApiPersonalAudioAssistant.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Message>> GetMessagesByConversationIdPaginatorAsync(string conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        public async Task<List<Message>> GetMessagesByConversationIdPaginatorAsync(
+            string conversationId,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken)
         {
-            return await _context.Messages
+            // 1) Сортуємо спочатку за DESC, щоб взяти останні pageSize повідомлень
+            var page = await _context.Messages
                 .Where(m => m.ConversationId == conversationId)
-                .OrderBy(c => c.DateTimeCreated)
+                .OrderByDescending(m => m.DateTimeCreated)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
+
+            // 2) Повертаємо їх у хронологічному порядку (ASC) для коректного відображення в UI
+            return page
+                .OrderBy(m => m.DateTimeCreated)
+                .ToList();
         }
+
     }
 }
