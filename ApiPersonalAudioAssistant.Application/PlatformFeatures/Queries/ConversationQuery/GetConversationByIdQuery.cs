@@ -6,7 +6,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.Convers
 {
     public class GetConversationByIdQuery : IRequest<ConversationsResponse>
     {
-        public required string SubUserId { get; set; }
+        public required string ConversationId { get; set; }
 
         public class GetConversationByIdQueryHandler : IRequestHandler<GetConversationByIdQuery, ConversationsResponse>
         {
@@ -19,17 +19,18 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.Convers
 
             public async Task<ConversationsResponse> Handle(GetConversationByIdQuery query, CancellationToken cancellationToken)
             {
-                var conversations = await _conversationRepository.GetConversationByIdAsync(query.SubUserId, cancellationToken);
+                var conversation = await _conversationRepository.GetConversationByIdAsync(query.ConversationId, cancellationToken);
 
-                if (conversations == null)
+                if (conversation == null)
                 {
                     throw new Exception("Conversation not found");
                 }
 
                 var response = new ConversationsResponse
                 {
-                    IdConversation = conversations.Id.ToString(),
-                    Description = conversations.Description
+                    IdConversation = conversation.Id.ToString(),
+                    Description = conversation.Description,
+                    SubUserId = conversation.SubUserId
                 };
 
                 return response;

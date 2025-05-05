@@ -20,7 +20,7 @@ namespace ApiPersonalAudioAssistant.Application.Services
             var exists = await blobClient.ExistsAsync();
             if (!exists)
             {
-                throw new Exception($"Blob '{fileName}' does not exist in container '{containerType}'.");
+                return false;
             }
             return exists;
         }
@@ -128,6 +128,7 @@ namespace ApiPersonalAudioAssistant.Application.Services
             {
                 BlobContainerType.AudioMessage => _client.GetBlobContainerClient("audio-message"),
                 BlobContainerType.UserImage => _client.GetBlobContainerClient("user-image"),
+                BlobContainerType.FirstMessage => _client.GetBlobContainerClient("first-message"),
                 _ => throw new ArgumentOutOfRangeException(nameof(type), $"Unsupported container type: {type}")
             };
         }
@@ -141,6 +142,7 @@ namespace ApiPersonalAudioAssistant.Application.Services
     public enum BlobContainerType
     {
         AudioMessage,
-        UserImage
+        UserImage,
+        FirstMessage
     }
 }

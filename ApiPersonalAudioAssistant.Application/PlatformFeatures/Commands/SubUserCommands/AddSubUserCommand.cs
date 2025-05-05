@@ -23,16 +23,18 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
     public class AddSubUserCommandHandler : IRequestHandler<AddSubUserCommand, string>
     {
         private readonly ISubUserRepository _subUserRepository;
+        private readonly IVoiceRepository _voiceRepository;
         private readonly IConfiguration _configuration;
         private readonly IBlobStorage _blobStorage;
         private readonly PasswordManager _passwordManager;
 
-        public AddSubUserCommandHandler(ISubUserRepository subUserRepository, IConfiguration configuration, PasswordManager passwordManager, IBlobStorage blobStorage)
+        public AddSubUserCommandHandler(ISubUserRepository subUserRepository, IConfiguration configuration, PasswordManager passwordManager, IBlobStorage blobStorage, IVoiceRepository voiceRepository)
         {
             _subUserRepository = subUserRepository;
             _configuration = configuration;
             _passwordManager = passwordManager;
             _blobStorage = blobStorage;
+            _voiceRepository = voiceRepository;
         }
 
         public async Task<string> Handle(AddSubUserCommand request, CancellationToken cancellationToken = default)
@@ -55,6 +57,11 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
                 UserId = request.UserId
             };
 
+            var voiceId = await _voiceRepository.GetVoiceByIdAsync(request.VoiceId, cancellationToken);
+            var textToSpeech = new ElevenlabsApi();
+            var audioBytesTask = textToSpeech.ConvertTextToSpeechAsync(voiceId.VoiceId, $"Чим я можу вам допомогти, {newUser.UserName}");
+            string fileNameAudio = $"{newUser.Id}.wav";
+
             if (request.Password != null)
             {
                 _passwordManager.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -70,6 +77,14 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.SubUse
 
             newUser.PhotoPath = $"https://audioassistantblob.blob.core.windows.net/user-image/{fileName}";
             await _subUserRepository.UpdateUser(newUser, cancellationToken);
+
+            if (audioBytesTask.Result != null && audioBytesTask.Result.Length > 0)
+            {
+                using (var streamAudio = new MemoryStream(audioBytesTask.Result))
+                {
+                    var taskBlob = _blobStorage.PutContextAsync(fileNameAudio, streamAudio, BlobContainerType.FirstMessage);
+                }
+            }
 
             return newUser.Id.ToString();
         }

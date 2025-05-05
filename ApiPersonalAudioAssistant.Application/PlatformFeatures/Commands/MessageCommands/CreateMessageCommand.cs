@@ -41,28 +41,27 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Commands.Messag
                 bytesAudio = request.Audio;
             }
 
-
-                var message = new Message
-                {
-                    ConversationId = request.ConversationId,
-                    Text = request.Text,
-                    SubUserId = request.SubUserId,
-                    UserRole = request.UserRole,
-                    DateTimeCreated = DateTime.UtcNow,
-                    LastRequestId = request.LastRequestId,
-                };
+            var message = new Message
+            {
+                ConversationId = request.ConversationId,
+                Text = request.Text,
+                SubUserId = request.SubUserId,
+                UserRole = request.UserRole,
+                DateTimeCreated = DateTime.UtcNow,
+                LastRequestId = request.LastRequestId,
+            };
 
             string fileName = $"{Guid.NewGuid()}.wav";
             if (request.Audio != null && request.Audio.Length > 0)
             {
                 using (var stream = new MemoryStream(bytesAudio))
                 {
-                    await _blobStorage.PutContextAsync(fileName, stream, BlobContainerType.AudioMessage);
+                    var taskBlob = _blobStorage.PutContextAsync(fileName, stream, BlobContainerType.AudioMessage);
                 }
-
             }
+
             message.AudioPath = $"https://audioassistantblob.blob.core.windows.net/audio-message/{fileName}";
-            await _messageRepository.AddMessageAsync(message, cancellationToken);
+            var taskMessage = _messageRepository.AddMessageAsync(message, cancellationToken);
 
             var messageResponse = new MessageResponse()
             {

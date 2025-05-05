@@ -78,6 +78,7 @@ namespace ApiPersonalAudioAssistant.Application.PlatformFeatures.Queries.Convers
                         {
                             IdConversation = conv.Id.ToString(),
                             Description = conv.Description,
+                            SubUserId = conv.SubUserId.ToString(),
                             DateTimeCreated = conv.DateTimeCreated
                         });
 
