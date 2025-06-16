@@ -5,6 +5,5 @@ Built with ASP.NET Core and C#, it implements Onion architecture and CQRS patter
 
 **Quick Start**
 To run the server:
-
-Install the required NuGet packages;
-Build and run the project using.
+  Install the required NuGet packages;
+  Build and run the project using.
